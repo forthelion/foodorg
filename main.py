@@ -1,9 +1,42 @@
 from datetime import datetime
-from email.mime.text import MIMEText
+import json
+import os
 import smtpserver
-
 food_list = []
+#food_list_json = os.getenv('FOOD_LIST')
+#turn this into evoriment variable
 unique_number_counter = 1
+
+
+
+def save_food_list():
+    global food_list
+    # Convert the date to a string in the format YYYY-MM-DD before saving
+    food_list_json = json.dumps([{
+        "unique_number": item.unique_number,
+        "name": item.name,
+        "expiration_date": item.expiration_date.strftime("%Y-%m-%d"),  # Convert date to string
+        "notes": item.notes
+    } for item in food_list])
+    os.environ['FOOD_LIST'] = food_list_json
+
+
+# Function to save the food list into environment variables
+def load_food_list():
+    global food_list
+    food_list_json = os.getenv('FOOD_LIST')
+    if food_list_json:
+        food_list_data = json.loads(food_list_json)
+        food_list = [
+            FoodItem(
+                unique_number=item["unique_number"],
+                name=item["name"],
+                expiration_date=datetime.strptime(item["expiration_date"], "%Y-%m-%d").date(),  # Convert string back to date
+                notes=item["notes"]
+            ) for item in food_list_data
+        ]
+    else:
+        food_list = []
 
 
 
@@ -19,7 +52,7 @@ class FoodItem:
         current_date = datetime.now().date()
         if current_date > self.expiration_date:
             data_of_food = str(self)
-            self.send_message(self.name, data_of_food)
+            smtpserver.send_message(self.name, data_of_food)
             return True
         else:
             return False
@@ -31,8 +64,10 @@ class FoodItem:
 
 
 def main():
+    load_food_list()
     def add_food_item():
         global unique_number_counter
+        unique_number_counter = len(food_list) + 1
 
         while True:
             smtpserver.is_email_setUp()
@@ -45,7 +80,14 @@ def main():
                 expiration_date = input("Enter the expiration date (YYYY-MM-DD): ")
                 try:
                     expiration_date = datetime.strptime(expiration_date, "%Y-%m-%d").date()
+
+                    # prevents food that exspire  today or past it will not  be added to the list
+                    if expiration_date <= datetime.now().date():
+                        print("The expiration date cannot be today or in the past. Please enter a valid future date.")
+                        continue
+
                     food_list.append(FoodItem(unique_number_counter, name, expiration_date, notes))
+                    save_food_list()
                     print(f"Item {unique_number_counter} ({name}) has been added to the list.")
                     unique_number_counter += 1
                     break
@@ -54,7 +96,7 @@ def main():
             while True:
                 user_input = input("do you want to add another food item enter 'yes' or exit enter 'exit'.")
                 if user_input == 'exit':
-                    print("Exiting the program. Goodbye!")
+                    print("leaving method to add food to list ")
                     return
                 elif user_input == 'yes':
                     break

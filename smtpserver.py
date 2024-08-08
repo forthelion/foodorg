@@ -21,8 +21,8 @@ def setUp():
     global email, email_password, smtp_server
     email_services = {
         "gmail": "smtp.gmail.com",
-        "yahoo": "smtp.mail.yahoo.com",
-        "outlook": "smtp-mail.outlook.com"
+        "untested yahoo": "smtp.mail.yahoo.com",
+        "untested outlook": "smtp-mail.outlook.com"
     }
     print("Please input your email service. Currently supporting:")
     for service in email_services.keys():
@@ -35,7 +35,7 @@ def setUp():
             print("Unsupported email service. Please choose from the list above.")
             continue
         email = input("Please enter your email: ")
-        email_password = input("Please enter your email: ")
+        email_password = input("Please enter your password: ")
         smtp_server = email_services[email_service]
         # ask users for pasword saves
 
@@ -83,7 +83,7 @@ def send_message( food, data_of_food):
     body = data_of_food
     em = EmailMessage()
     em['From'] = email
-    em['To'] = email_password
+    em['To'] = email
     em['subject'] = subject
     em.set_content(body)
 
