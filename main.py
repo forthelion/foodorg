@@ -4,39 +4,62 @@ import os
 import smtpserver
 food_list = []
 #food_list_json = os.getenv('FOOD_LIST')
-#turn this into evoriment variable
+#turn this into text file or someother thing that saves
 unique_number_counter = 1
 
 
 
 def save_food_list():
     global food_list
+    file_name = "food_list.json"
+
     # Convert the date to a string in the format YYYY-MM-DD before saving
     food_list_json = json.dumps([{
         "unique_number": item.unique_number,
         "name": item.name,
         "expiration_date": item.expiration_date.strftime("%Y-%m-%d"),  # Convert date to string
         "notes": item.notes
-    } for item in food_list])
-    os.environ['FOOD_LIST'] = food_list_json
+    } for item in food_list], indent=4)  # Pretty-print with indentation
 
+    # Write the JSON data to the file
+    with open(file_name, "w") as file:
+        file.write(food_list_json)
+    # test
+    # print(f"{file_name} has been updated.")
 
 # Function to save the food list into environment variables
 def load_food_list():
     global food_list
-    food_list_json = os.getenv('FOOD_LIST')
-    if food_list_json:
-        food_list_data = json.loads(food_list_json)
-        food_list = [
-            FoodItem(
-                unique_number=item["unique_number"],
-                name=item["name"],
-                expiration_date=datetime.strptime(item["expiration_date"], "%Y-%m-%d").date(),  # Convert string back to date
-                notes=item["notes"]
-            ) for item in food_list_data
-        ]
+    file_name = "food_list.json"
+
+    # Check if the file exists
+    if os.path.exists(file_name):
+        with open(file_name, "r") as file:
+            food_list_json = file.read()
+
+        if food_list_json:
+            food_list_data = json.loads(food_list_json)
+            food_list = [
+                FoodItem(
+                    unique_number=item["unique_number"],
+                    name=item["name"],
+                    expiration_date=datetime.strptime(item["expiration_date"], "%Y-%m-%d").date(),
+                    # Convert string back to date
+                    notes=item["notes"]
+                ) for item in food_list_data
+            ]
+            # testing
+            #print(f"{file_name} loaded successfully.")
+
     else:
+        # If file doesn't exist, create it with default content (e.g., an empty list)
+        food_list_data = []
+        with open(file_name, "w") as file:
+            json.dump(food_list_data, file, indent=4)
         food_list = []
+        # for testing
+        #print(f"{file_name} created with default content.")
+
 
 
 
@@ -64,13 +87,13 @@ class FoodItem:
 
 
 def main():
-    load_food_list()
+
     def add_food_item():
         global unique_number_counter
         unique_number_counter = len(food_list) + 1
-
+        smtpserver.is_email_setUp()
         while True:
-            smtpserver.is_email_setUp()
+
             name = input("Enter the food name: ").strip()
             if any(item.name.lower() == name.lower() for item in food_list):
                 print(f"An item with the name '{name}' already exists. Please enter a unique name.")
@@ -113,6 +136,7 @@ def main():
                 name = input("write name of item ")
                 food_list = [item for item in food_list if item.name.lower() != name.lower()]
                 print(f"{name} has been removed from the list, if it existed.")
+                save_food_list()
             elif option == "number":
                 try:
                     number = int(input("Enter the item number to delete: ").strip())
@@ -120,6 +144,7 @@ def main():
                     food_list = [item for item in food_list if item.unique_number != number]
                     if len(food_list) < original_length:
                         print(f"Item number {number} has been removed from the list.")
+                        save_food_list()
                     else:
                         print(f"No item found with the number {number}.")
                 except ValueError:
@@ -137,11 +162,14 @@ def main():
         else:
             print("The food list is empty.")
 
+    load_food_list()
     while True:
         smtpserver.is_email_setUp()
+
         user_input = input("Enter a command (setup,add, delete, view, exit): ").lower()
 
         if user_input == 'exit':
+            save_food_list()
             print("Exiting the program. Goodbye!")
             break
         elif user_input == 'setup':
