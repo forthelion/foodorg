@@ -5,7 +5,7 @@ import smtpserver
 food_list = []
 #food_list_json = os.getenv('FOOD_LIST')
 #turn this into text file or someother thing that saves
-unique_number_counter = 1
+
 
 
 
@@ -15,7 +15,7 @@ def save_food_list():
 
     # Convert the date to a string in the format YYYY-MM-DD before saving
     food_list_json = json.dumps([{
-        "unique_number": item.unique_number,
+
         "name": item.name,
         "expiration_date": item.expiration_date.strftime("%Y-%m-%d"),  # Convert date to string
         "notes": item.notes
@@ -41,7 +41,7 @@ def load_food_list():
             food_list_data = json.loads(food_list_json)
             food_list = [
                 FoodItem(
-                    unique_number=item["unique_number"],
+
                     name=item["name"],
                     expiration_date=datetime.strptime(item["expiration_date"], "%Y-%m-%d").date(),
                     # Convert string back to date
@@ -64,8 +64,8 @@ def load_food_list():
 
 
 class FoodItem:
-    def __init__(self, unique_number, name, expiration_date, notes):
-        self.unique_number = unique_number
+    def __init__(self, name, expiration_date, notes):
+
         self.name = name
         self.expiration_date = expiration_date
         self.notes = notes
@@ -82,15 +82,16 @@ class FoodItem:
 
     def __str__(self):
         status = "Expired" if self.is_expired() else "Fresh"
-        return f"ID: {self.unique_number}, Name: {self.name}, Expires: {self.expiration_date}, Notes: {self.notes}, Status: {status}"
+        return f"  Name: {self.name}, Expires: {self.expiration_date}, Notes: {self.notes}, Status: {status}"
+
+
 
 
 
 def main():
-
+    def check_food_expired():
+        pass
     def add_food_item():
-        global unique_number_counter
-        unique_number_counter = len(food_list) + 1
         smtpserver.is_email_setUp()
         while True:
 
@@ -109,10 +110,10 @@ def main():
                         print("The expiration date cannot be today or in the past. Please enter a valid future date.")
                         continue
 
-                    food_list.append(FoodItem(unique_number_counter, name, expiration_date, notes))
+                    food_list.append(FoodItem( name, expiration_date, notes))
                     save_food_list()
-                    print(f"Item {unique_number_counter} ({name}) has been added to the list.")
-                    unique_number_counter += 1
+                    print(f"Item  ({name}) has been added to the list.")
+
                     break
                 except ValueError:
                     print("Invalid date format. Please use YYYY-MM-DD.")
@@ -131,24 +132,12 @@ def main():
         smtpserver.is_email_setUp()
         while True:
             view_food_list()
-            option = input("Enter a command (name(to delete by name),enter(to delete by number),view, exit): ")
+            option = input("Enter a command (name(delete),view, exit): ")
             if option == "name":
                 name = input("write name of item ")
                 food_list = [item for item in food_list if item.name.lower() != name.lower()]
                 print(f"{name} has been removed from the list, if it existed.")
                 save_food_list()
-            elif option == "number":
-                try:
-                    number = int(input("Enter the item number to delete: ").strip())
-                    original_length = len(food_list)
-                    food_list = [item for item in food_list if item.unique_number != number]
-                    if len(food_list) < original_length:
-                        print(f"Item number {number} has been removed from the list.")
-                        save_food_list()
-                    else:
-                        print(f"No item found with the number {number}.")
-                except ValueError:
-                    print("Please enter a valid number.")
             elif option == "exit":
                 break
             else:
@@ -163,10 +152,11 @@ def main():
             print("The food list is empty.")
 
     load_food_list()
+
     while True:
         smtpserver.is_email_setUp()
 
-        user_input = input("Enter a command (setup,add, delete, view, exit): ").lower()
+        user_input = input("Enter a command (setup, add, delete, view, notify_expired, exit): ").lower()
 
         if user_input == 'exit':
             save_food_list()
@@ -180,6 +170,8 @@ def main():
             delete_food_item()
         elif user_input == 'view':
             view_food_list()
+        elif user_input == 'notify_expired':
+            check_food_expired()
         else:
             print(f"Unknown command: {user_input}")
 
