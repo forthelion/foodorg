@@ -9,8 +9,8 @@ Launch the program with "python .\main.py"
 The program will show the commands and options it supports.
 
 To avoid entering your email information on every run set up the following Environment variables:
-    * EMAIL (put your email), 
-    * EMAIL_PASSWORD (recommendation: use alternative app password)
-    * SMTP_SERVER, which is just "smtp.gmail.com" as the two other email services dont work for now.
 
+* EMAIL (put your email), 
+* EMAIL_PASSWORD (recommendation: use alternative app password)
+* SMTP_SERVER, which is just "smtp.gmail.com" as the two other email services dont work for now.
  
