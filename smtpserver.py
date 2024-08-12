@@ -9,15 +9,18 @@ email = os.getenv('EMAIL')
 email_password = os.getenv('EMAIL_PASSWORD')
 smtp_server = os.getenv('SMTP_SERVER')
 
+
 def has_email_password():
     return bool(email and email_password and smtp_server)
+
 
 def is_email_setUp():
     if not has_email_password():
         print("You need to setup email, program can not send updates if food spoil  ")
         setUp()
-def setUp():
 
+
+def setUp():
     global email, email_password, smtp_server
     email_services = {
         "gmail": "smtp.gmail.com",
@@ -34,9 +37,17 @@ def setUp():
         if email_service not in email_services:
             print("Unsupported email service. Please choose from the list above.")
             continue
+        elif email_service == "gmail":
+            smtp_server = "smtp.gmail.com"
+        """ will figure out this later 
+        elif email_service == "yahoo":
+            smtp_server = "smtp.yahoo.com"
+        elif email_service == "outlook":
+            smtp_server = "smtp.outlook.com"
+        """
         email = input("Please enter your email: ")
         email_password = input("Please enter your password: ")
-        smtp_server = email_services[email_service]
+
         # ask users for pasword saves
 
         os.environ['EMAIL'] = email
@@ -55,8 +66,6 @@ def setUp():
             print("Failed to send the test email.")
 
 
-
-
 def send_test_email():
     try:
         subject = 'test'
@@ -69,17 +78,17 @@ def send_test_email():
 
         context = ssl.create_default_context()
         # make it so you can swap  email
-        with smtplib.SMTP_SSL( smtp_server, 465, context=context) as smtp:
-            smtp.login( email, email_password)
+        with smtplib.SMTP_SSL(smtp_server, 465, context=context) as smtp:
+            smtp.login(email, email_password)
             smtp.sendmail(email, email, em.as_string())
         return True
     except Exception as e:
         print(f"Error: {e}")
         return False
 
-def send_message( food, data_of_food):
 
-    subject = 'alert'+ food +'spoiled'
+def send_message(food, data_of_food):
+    subject = f'Alert: {food} has spoiled'
     body = data_of_food
     em = EmailMessage()
     em['From'] = email
@@ -89,6 +98,6 @@ def send_message( food, data_of_food):
 
     context = ssl.create_default_context()
     # make it so you can swap  email
-    with smtplib.SMTP_SSL( smtp_server, 465, context=context) as smtp:
-        smtp.login( email, email_password)
+    with smtplib.SMTP_SSL(smtp_server, 465, context=context) as smtp:
+        smtp.login(email, email_password)
         smtp.sendmail(email, email, em.as_string())

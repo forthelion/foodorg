@@ -74,8 +74,10 @@ class FoodItem:
         # update word
         current_date = datetime.now().date()
         if current_date > self.expiration_date:
-            data_of_food = str(self)
-            smtpserver.send_message(self.name, data_of_food)
+            data_of_food = f"Expiration Date: {self.expiration_date.strftime('%Y-%m-%d')}"
+            nameCover = self.name
+            smtpserver.send_message(nameCover, data_of_food )
+
             return True
         else:
             return False
@@ -90,7 +92,13 @@ class FoodItem:
 
 def main():
     def check_food_expired():
-        pass
+        global food_list
+        for item in food_list:
+            if item.is_expired():
+                print(f"{item.name} is expired!")
+            else:
+                print(f"{item.name} is still fresh.")
+
     def add_food_item():
         smtpserver.is_email_setUp()
         while True:
