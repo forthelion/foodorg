@@ -3,8 +3,7 @@ import json
 import os
 import smtpserver
 food_list = []
-#food_list_json = os.getenv('FOOD_LIST')
-#turn this into text file or someother thing that saves
+
 
 
 
@@ -17,11 +16,11 @@ def save_food_list():
     food_list_json = json.dumps([{
 
         "name": item.name,
-        "expiration_date": item.expiration_date.strftime("%Y-%m-%d"),  # Convert date to string
+        "expiration_date": item.expiration_date.strftime("%Y-%m-%d"),
         "notes": item.notes
-    } for item in food_list], indent=4)  # Pretty-print with indentation
+    } for item in food_list], indent=4)
 
-    # Write the JSON data to the file
+
     with open(file_name, "w") as file:
         file.write(food_list_json)
     # test
@@ -52,7 +51,7 @@ def load_food_list():
             #print(f"{file_name} loaded successfully.")
 
     else:
-        # If file doesn't exist, create it with default content (e.g., an empty list)
+        # If file doesn't exist, create it with  empty list
         food_list_data = []
         with open(file_name, "w") as file:
             json.dump(food_list_data, file, indent=4)
@@ -85,8 +84,6 @@ class FoodItem:
     def __str__(self):
         status = "Expired" if self.is_expired() else "Fresh"
         return f"  Name: {self.name}, Expires: {self.expiration_date}, Notes: {self.notes}, Status: {status}"
-
-
 
 
 
